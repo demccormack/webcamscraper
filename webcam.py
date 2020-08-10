@@ -41,12 +41,15 @@ def getCam(url, target):
 
     onemin = datetime.timedelta(minutes=1)
     loops = 0
-    while loops < 29 and magic.from_file(tmpTarget.format(target), mime=True) == "application/octet-stream":
+    successful = False
+    while loops < 29 and not successful:
         dt = dt - onemin
         getImg(dt)
         loops += 1
+        if magic.from_file(tmpTarget.format(target), mime=True) == "image/jpeg":
+            successful = True
 
-    if magic.from_file(tmpTarget.format(target), mime=True) == "image/jpeg":
+    if successful:
         report("\nFound valid jpg image for {}".format(target))
         os.rename(tmpTarget.format(target), finalTarget.format(target))
         report("\nMoved {} to live web folder".format(target))
