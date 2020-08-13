@@ -6,7 +6,7 @@ import pytz
 import os
 import json
 
-starttime = datetime.datetime.utcnow() - datetime.timedelta(hours=4)
+starttime = datetime.datetime.utcnow()
 config = open("config.json", "r")
 configObj = json.loads(config.read())
 config.close()
