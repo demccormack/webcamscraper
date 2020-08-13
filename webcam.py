@@ -6,7 +6,7 @@ import pytz
 import os
 import json
 
-starttime = datetime.datetime.utcnow()
+starttime = datetime.datetime.utcnow() - datetime.timedelta(hours=4)
 config = open("config.json", "r")
 configObj = json.loads(config.read())
 config.close()
@@ -22,43 +22,42 @@ def report(msg):
 report("\n\n----------------------------------------------\n")
 
 nztz = pytz.timezone("Pacific/Auckland")
-tmpTarget = configObj["tmpTarget"] + "{}"
-finalTarget = configObj["finalTarget"] + "{}"
+tmpdir = configObj["tmpdir"]
+finaldir = configObj["finaldir"]
 dictUrl = configObj["url"]
 
 
-def getCam(url, target):
+def getcam(dir, file):
 
-    def getImg(_dt):
-        strTime = nztz.fromutc(_dt).strftime("%y%m%d-%H%M")
-        fullUrl = url.format(t=strTime)
-        report("\nLooking for image at " + fullUrl)
+    def getimg(_dt):
+        time = nztz.fromutc(_dt).strftime("%y%m%d-%H%M")
+        fullUrl = f"{dir}{file}_{time}.jpg"
+        report(f"\nLooking for image at {fullUrl}")
         myfile = requests.get(fullUrl)
-        open(tmpTarget.format(target), "wb").write(myfile.content)
+        open(f"{tmpdir}{file}.jpg", "wb").write(myfile.content)
 
     dt = starttime
-    getImg(dt)
+    getimg(dt)
 
     onemin = datetime.timedelta(minutes=1)
     loops = 0
     successful = False
     while loops < 29 and not successful:
         dt = dt - onemin
-        getImg(dt)
+        getimg(dt)
         loops += 1
-        if magic.from_file(tmpTarget.format(target), mime=True) == "image/jpeg":
+        if magic.from_file(f"{tmpdir}{file}.jpg", mime=True) == "image/jpeg":
             successful = True
 
     if successful:
-        report("\nFound valid jpg image for {}".format(target))
-        os.rename(tmpTarget.format(target), finalTarget.format(target))
-        report("\nMoved {} to live web folder".format(target))
+        report(f"\nFound valid jpg image for {file}.jpg")
+        os.rename(f"{tmpdir}{file}.jpg", f"{finaldir}{file}.jpg")
+        report(f"\nMoved {file}.jpg to {finaldir}")
     else:
-        report("\nNo jpg images found for {}".format(target))
+        report(f"\nNo jpg images found for {file}.jpg")
 
 
-for key in dictUrl:
-    getCam("{dir}{file}_{t}.jpg".format(
-        dir=dictUrl[key], file=key, t="{t}"), "{}.jpg".format(key))
+for file, dir in dictUrl.items():
+    getcam(dir, file)
 
 log.close()
