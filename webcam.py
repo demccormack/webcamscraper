@@ -1,4 +1,4 @@
-#!/bin/python3
+#!/usr/bin/env python3
 import requests
 import magic
 import datetime
@@ -6,12 +6,12 @@ import pytz
 import os
 import json
 
-starttime = datetime.datetime.utcnow() - datetime.timedelta(hours=3)
-config = open("config.json", "r")
-configObj = json.loads(config.read())
-config.close()
+starttime = datetime.datetime.utcnow()
+configfile = open("config.json", "r")
+config = json.loads(configfile.read())
+configfile.close()
 
-log = open(configObj["log"], "a+")
+log = open(config["log"], "a+")
 
 
 def report(msg):
@@ -22,44 +22,37 @@ def report(msg):
 report("\n----------------------------------------------")
 
 nztz = pytz.timezone("Pacific/Auckland")
-tmpdir = configObj["tmpdir"]
-finaldir = configObj["finaldir"]
-dictUrl = configObj["url"]
+tmpdir = config["tmpdir"]
+finaldir = config["finaldir"]
+dictUrl = config["url"]
 successes = 0
 
-def getcam(dir, file):
-    
-    def getimg(_dt):
-        time = nztz.fromutc(_dt).strftime("%y%m%d-%H%M")
-        fullUrl = f"{dir}{file}_{time}.jpg"
-        report(f"Looking for image at {fullUrl}")
-        myfile = requests.get(fullUrl)
-        open(f"{tmpdir}{file}.jpg", "wb").write(myfile.content)
-        
-    dt = starttime
-    getimg(dt)
-
-    onemin = datetime.timedelta(minutes=1)
-    loops = 0
+def getcam(dir, file):    
+    minutesago = 0
     successful = False
-    while loops < 29 and not successful:
-        dt = dt - onemin
-        getimg(dt)
-        loops += 1
+    while minutesago < 30 and not successful:
+        utc = starttime - datetime.timedelta(minutes=minutesago)
+        time = nztz.fromutc(utc).strftime("%y%m%d-%H%M")
+        url = f"{dir}{file}_{time}.jpg"
+        report(f"Looking for image at {url}")
+        myfile = requests.get(url)
+        open(f"{tmpdir}{file}.jpg", "wb").write(myfile.content)
         if magic.from_file(f"{tmpdir}{file}.jpg", mime=True) == "image/jpeg":
             successful = True
+        minutesago += 1
 
     if successful:
         report(f"Found valid jpg image for {file}.jpg")
         os.rename(f"{tmpdir}{file}.jpg", f"{finaldir}{file}.jpg")
-        successes += 1
         report(f"Moved {file}.jpg to {finaldir}")
+        return True
     else:
         report(f"No jpg images found for {file}.jpg")
-
+        return False
 
 for file, dir in dictUrl.items():
-    getcam(dir, file)
+    if getcam(dir, file) == True:
+        successes += 1
 
-report(f"webcamscraper found {successes} images in {datetime.datetime.utcnow() - starttime}")
+report(f"webcamscraper found {successes} images in {(datetime.datetime.utcnow() - starttime).seconds} seconds")
 log.close()
