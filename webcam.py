@@ -6,7 +6,7 @@ import pytz
 import os
 import json
 
-starttime = datetime.datetime.utcnow()
+starttime = datetime.datetime.utcnow() - datetime.timedelta(hours=3)
 config = open("config.json", "r")
 configObj = json.loads(config.read())
 config.close()
@@ -16,26 +16,26 @@ log = open(configObj["log"], "a+")
 
 def report(msg):
     print(msg)
-    log.write(msg)
+    log.write(f"\n{msg}")
 
 
-report("\n\n----------------------------------------------\n")
+report("\n----------------------------------------------")
 
 nztz = pytz.timezone("Pacific/Auckland")
 tmpdir = configObj["tmpdir"]
 finaldir = configObj["finaldir"]
 dictUrl = configObj["url"]
-
+successes = 0
 
 def getcam(dir, file):
-
+    
     def getimg(_dt):
         time = nztz.fromutc(_dt).strftime("%y%m%d-%H%M")
         fullUrl = f"{dir}{file}_{time}.jpg"
-        report(f"\nLooking for image at {fullUrl}")
+        report(f"Looking for image at {fullUrl}")
         myfile = requests.get(fullUrl)
         open(f"{tmpdir}{file}.jpg", "wb").write(myfile.content)
-
+        
     dt = starttime
     getimg(dt)
 
@@ -50,14 +50,16 @@ def getcam(dir, file):
             successful = True
 
     if successful:
-        report(f"\nFound valid jpg image for {file}.jpg")
+        report(f"Found valid jpg image for {file}.jpg")
         os.rename(f"{tmpdir}{file}.jpg", f"{finaldir}{file}.jpg")
-        report(f"\nMoved {file}.jpg to {finaldir}")
+        successes += 1
+        report(f"Moved {file}.jpg to {finaldir}")
     else:
-        report(f"\nNo jpg images found for {file}.jpg")
+        report(f"No jpg images found for {file}.jpg")
 
 
 for file, dir in dictUrl.items():
     getcam(dir, file)
 
+report(f"webcamscraper found {successes} images in {datetime.datetime.utcnow() - starttime}")
 log.close()
