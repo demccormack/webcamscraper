@@ -6,17 +6,17 @@ import pytz
 import os
 import json
 
-starttime = datetime.datetime.utcnow()
+starttime = datetime.datetime.utcnow() - datetime.timedelta(hours=3)
 configfile = open("config.json", "r")
 config = json.loads(configfile.read())
 configfile.close()
 
-log = open(config["log"], "a+")
-
 
 def report(msg):
     print(msg)
+    log = open(config["log"], "a+")
     log.write(f"\n{msg}")
+    log.close()
 
 
 report("\n----------------------------------------------")
@@ -55,4 +55,3 @@ for file, dir in dictUrl.items():
         successes += 1
 
 report(f"webcamscraper found {successes} images in {(datetime.datetime.utcnow() - starttime).seconds} seconds")
-log.close()
