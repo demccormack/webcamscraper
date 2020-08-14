@@ -1,4 +1,4 @@
-Webcam image URLs often contain the time when the image was taken. If the images 
+<!-- Webcam image URLs often contain the time when the image was taken. If the images 
 are not taken at regular times, it is difficult to access them programmatically. 
 This script looks for the latest image and then copies it to our own static URL 
 for easier access. The script is quite slow (up to a minute), but it can be scheduled 
@@ -21,4 +21,4 @@ with two backslashes \\
 
 The url array can contain as many images as you like. Only jpeg images with names ending 
 in ".jpg" are supported, but don't add this suffix to any of the parameters in the config 
-file.
+file. -->
