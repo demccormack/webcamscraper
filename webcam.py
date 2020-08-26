@@ -24,7 +24,7 @@ def report(msg):
     log.close()
 
 report(f"----------------------------------------------\nWebcamscraper started at {nztz.fromutc(starttime).strftime('%y%m%d-%H%M')}")
-if nztz.fromutc(starttime).hour != config["hour"]:
+if nztz.fromutc(starttime).hour != int(config["hour"]):
     report("Closing due to wrong time")
     sys.exit("Closing due to wrong time")
 
