@@ -13,7 +13,7 @@ config = json.loads(configfile.read())
 configfile.close()
 
 cwd = os.getcwd()
-finaldir = config["finaldir"]
+dest = config["dest"]
 dictUrl = config["url"]
 nztz = pytz.timezone(config["timezone"])
 
@@ -46,8 +46,8 @@ def getcam(dir, file):
 
     if successful:
         report(f"Found valid jpg image for {file}.jpg")
-        os.rename(f"{os.path.join(cwd, file)}.jpg", f"{os.path.join(finaldir, file)}.jpg")
-        report(f"Moved {file}.jpg to {finaldir}")
+        os.rename(f"{os.path.join(cwd, file)}.jpg", f"{os.path.join(dest, file)}.jpg")
+        report(f"Moved {file}.jpg to {dest}")
         return True
     else:
         report(f"No jpg images found for {file}.jpg")
