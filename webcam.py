@@ -12,16 +12,16 @@ configfile = open("config.json", "r")
 config = json.loads(configfile.read())
 configfile.close()
 
-def report(msg):
-    print(msg)
-    log = open(config["log"], "a+")
-    log.write(f"\n{msg}")
-    log.close()
-
-tmpdir = config["tmpdir"]
+cwd = os.getcwd()
 finaldir = config["finaldir"]
 dictUrl = config["url"]
 nztz = pytz.timezone(config["timezone"])
+
+def report(msg):
+    print(msg)
+    log = open(os.path.join(cwd, "webcamscraper.log"), "a+")
+    log.write(f"\n{msg}")
+    log.close()
 
 report(f"----------------------------------------------\nWebcamscraper started at {nztz.fromutc(starttime).strftime('%y%m%d-%H%M')}")
 if nztz.fromutc(starttime).hour != config["hour"]:
@@ -36,17 +36,17 @@ def getcam(dir, file):
     while minutesago < 30 and not successful:
         utc = starttime - datetime.timedelta(minutes=minutesago)
         time = nztz.fromutc(utc).strftime("%y%m%d-%H%M")
-        url = f"{dir}{file}_{time}.jpg"
+        url = f"{os.path.join(dir, file)}_{time}.jpg"
         report(f"Looking for image at {url}")
         myfile = requests.get(url)
-        open(f"{tmpdir}{file}.jpg", "wb").write(myfile.content)
-        if magic.from_file(f"{tmpdir}{file}.jpg", mime=True) == "image/jpeg":
+        open(f"{os.path.join(cwd, file)}.jpg", "wb").write(myfile.content)
+        if magic.from_file(f"{os.path.join(cwd, file)}.jpg", mime=True) == "image/jpeg":
             successful = True
         minutesago += 1
 
     if successful:
         report(f"Found valid jpg image for {file}.jpg")
-        os.rename(f"{tmpdir}{file}.jpg", f"{finaldir}{file}.jpg")
+        os.rename(f"{os.path.join(cwd, file)}.jpg", f"{os.path.join(finaldir, file)}.jpg")
         report(f"Moved {file}.jpg to {finaldir}")
         return True
     else:
