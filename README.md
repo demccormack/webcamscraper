@@ -1,3 +1,6 @@
+This branch will detect the time and exit unless it is 0815. Detecting the time in 
+Python instead of Cron means I can allow for daylight saving clock changes.
+
 Webcam image URLs often contain the time when the image was taken. If the images 
 are not taken at regular times, it is difficult to access them programmatically. 
 This script looks for the latest image and then copies it to our own static URL 
