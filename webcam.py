@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import requests
+import sys
 import magic
 import datetime
 import pytz
@@ -11,20 +12,22 @@ configfile = open("config.json", "r")
 config = json.loads(configfile.read())
 configfile.close()
 
-
 def report(msg):
     print(msg)
     log = open(config["log"], "a+")
     log.write(f"\n{msg}")
     log.close()
 
-
-report("\n----------------------------------------------")
-
-nztz = pytz.timezone("Pacific/Auckland")
 tmpdir = config["tmpdir"]
 finaldir = config["finaldir"]
 dictUrl = config["url"]
+nztz = pytz.timezone(config["timezone"])
+
+report(f"----------------------------------------------\nWebcamscraper started at {nztz.fromutc(starttime).strftime('%y%m%d-%H%M')}")
+if nztz.fromutc(starttime).hour != config["hour"]:
+    report("Closing due to wrong time")
+    sys.exit("Closing due to wrong time")
+
 successes = 0
 
 def getcam(dir, file):    
