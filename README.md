@@ -1,10 +1,8 @@
-Webcam image URLs often contain the time when the image was taken. If the images 
-are not taken at regular times, it is difficult to access them programmatically. 
-This script looks for the latest image and then copies it to our own static URL 
-for easier access. The script is quite slow (up to two minutes depending on connection speed), but it can be scheduled to run automatically in the background, e.g. using cron. This branch detects the time and exits unless it is between 8am and 9am. Detecting the time in Python instead of Cron means I can allow for daylight saving clock changes.
+Webcam image URLs often contain the time when the image was taken. If the images are not taken at regular times, it is difficult to access them programmatically. This script looks for the latest image and then copies it to our own static URL for easier access. It does this daily.
 
-To use the script, create a file called config.json in the same directory using 
-the following format:
+The script can take up to two minutes depending on connection speed, so it should be scheduled to run automatically in the background, e.g. using cron. Detecting the time in Python instead of cron means I can allow for daylight saving clock changes.
+
+To use the script, create a ```config.json``` file in the same directory using the following format:
 
 ```
 {
@@ -39,4 +37,7 @@ Moved name2.jpg to /var/www/
 webcamscraper found 2 images in 16 seconds
 ```
 
-Finally, set up a cron job to run the script every hour.
+Finally, set up a cron job to run the script at 15 minutes past the hour by adding the following line to ```/etc/crontab``` (replace ```user``` with your Linux username):
+```
+15 * * * * user python3 ~/webcamscraper/webcamscraper.py
+```
