@@ -39,5 +39,5 @@ webcamscraper found 2 images in 16 seconds
 
 Finally, set up a cron job to run the script at 15 minutes past the hour by adding the following line to ```/etc/crontab``` (replace ```user``` with your Linux username):
 ```
-15 * * * * user cd ~/webcamscraper && python3 webcamscraper.py
+15 * * * * user cd ~/webcamscraper && python3 webcamscraper.py >> webcamscraper.log
 ```
