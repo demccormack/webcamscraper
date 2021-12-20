@@ -47,7 +47,7 @@ else:
         minutesago = 0
         successful = False
 
-        while minutesago < 30 and not successful:
+        while minutesago < 60 and not successful:
             trytime = localstarttime - timedelta(minutes=minutesago)
             tryurl = trytime.strftime(url)
             print(f"Looking for image at {tryurl}")
