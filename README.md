@@ -9,14 +9,21 @@ To use the script, create a ```config.json``` file in the same directory using t
     "timezone" : "Pacific/Auckland",
     "hour" : "8",
     "dest" : "/var/www/",
-    "url" : {"name1": "https://some-url.com/webcam/name1/",
-         "name2": "https://some-url.com/webcam/name2/"}
+    "url" : {
+        "name1.jpg": "https://some-url.com/webcam/name1/name1_%y%m%d-%H%M.jpg",
+        "name2.jpg": "https://some-url.com/webcam/name2/name1_%y%m%d-%H%M.jpg"
+    },
+    "debug": {
+        "enabled": "Debug is on. Make this string empty to disable debugging.",
+        "forceHour": "8",
+        "forceMinute": "15"
+    }
 }
 ```
 
-The ```url``` array can contain as many images as you like. Only jpeg images with names ending 
-in ```.jpg``` are supported, but don't add this suffix to any of the parameters in the config 
-file.
+The ```url``` array can contain as many images as you like. Only jpeg images are supported. Replace any date/time 
+components in the URL with the substitutions given in 
+[Python strftime() documentation](https://docs.python.org/3/library/datetime.html#strftime-and-strptime-format-codes).
 
 The example config would produce the following output:
 
