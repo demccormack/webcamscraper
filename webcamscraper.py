@@ -14,7 +14,6 @@ config = json.loads(configfile.read())
 configfile.close()
 
 dest = config["dest"]
-dictUrl = config["url"]
 localtz = pytz.timezone(config["timezone"])
 
 def getLocalTime():
@@ -24,7 +23,7 @@ def getLocalTime():
         m = int(config["debug"]["forceMinute"])
         localtime -= timedelta(hours=(localtime.hour - h), minutes=(localtime.minute - m))
         if localtime > localtz.fromutc(datetime.utcnow()):
-            localtime -= datetime.timedelta(days=1)
+            localtime -= timedelta(days=1)
     return localtime
 
 localstarttime = getLocalTime()
@@ -40,34 +39,38 @@ if localstarttime.hour != int(config["hour"]) and not config["debug"]["enabled"]
 else:
     successes = 0
 
-    def getcam(file, url):    
+    def getcam(cam):
+        name = cam["name"]
+        url = cam["url"]
+        mimetype = cam["mimetype"]
+        myfile = None
         minutesago = 0
         successful = False
-        myfile = None
+
         while minutesago < 30 and not successful:
             trytime = localstarttime - timedelta(minutes=minutesago)
             tryurl = trytime.strftime(url)
             print(f"Looking for image at {tryurl}")
             myfile = requests.get(tryurl)
-            if magic.from_buffer(myfile.content, mime=True) == "image/jpeg":
+            if magic.from_buffer(myfile.content, mime=True) == mimetype:
                 successful = True
             minutesago += 1
 
         if successful:
-            print(f"Found valid jpg image for {file}")
-            open(os.path.join(dest, file), "wb").write(myfile.content)
-            print(f"Wrote {file} to {dest}")
+            print(f"Found valid {mimetype.split('/')[-1]} file for {name}")
+            open(os.path.join(dest, name), "wb").write(myfile.content)
+            print(f"Wrote {name} to {dest}")
         else:
-            print(f"No jpg images found for {file}")
+            print(f"No {mimetype.split('/')[-1]} files found for {name}")
         
         return successful
 
-    for file, url in dictUrl.items():
-        successes += getcam(file, url)
+    for cam in config["webcams"]:
+        successes += getcam(cam)
 
     localfinishtime = getLocalTime()
     timetaken = (localfinishtime - localstarttime).seconds
     print(f"webcamscraper found {successes} images in {timetaken} seconds")
 
-    if successes < len(dictUrl):
+    if successes < len(config["webcams"]):
         exit(1)
